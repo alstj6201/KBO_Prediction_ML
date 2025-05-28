@@ -49,4 +49,4 @@ if st.button("📊 예측하기"):
     explanation = generate_explanation(team1, team2, important_features, model_name, prediction)
     st.info(explanation)
 
-    print("djjdsljfslkjsl")
+    print("asdf")
