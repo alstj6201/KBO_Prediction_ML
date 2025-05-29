@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
-# from utils.data_loader import load_and_prepare_data
-# from utils.predictor import predict_with_model
-# from utils.shap_explainer import get_important_features
+from utils.data_loader import load_and_prepare_data
+from utils.predictor import predict_with_model
+from utils.shap_explainer import get_important_features
 from utils.gpt_summary import generate_explanation
 import joblib
 import os
