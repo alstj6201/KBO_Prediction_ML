@@ -18,13 +18,13 @@ def generate_explanation(team1: str, team2: str, features: list[str], model_name
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": "너는 야구 분석 전문가야. 데이터를 바탕으로 예측 해설을 잘 해줘야 해."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.7,
-            max_tokens=300
+            max_tokens=500
         )
         return response.choices[0].message.content.strip()
 
