@@ -1,52 +1,78 @@
 import streamlit as st
 import pandas as pd
-from utils.data_loader import load_and_prepare_data
-from utils.predictor import predict_with_model
-from utils.shap_explainer import get_important_features
-from utils.gpt_summary import generate_explanation
-import joblib
-import os
+from predictor import predict_model
+from data_loader import create_prediction_row
+from shap_explainer import explain_instance
+from gpt_summary import generate_explanation
+from joblib import load
+from tensorflow.keras.models import load_model
 
-st.set_page_config(page_title="KBO 승패 예측기", layout="wide")
+# 모델 로딩 함수
+def load_model_by_type(model_type):
+    if model_type == 'DeepLearning':
+        return load_model('../model/deep_learning_model.h5')
+    elif model_type == 'LogisticRegression':
+        return load('../model/logistic_model.pkl')
+    elif model_type == 'XGBoost':
+        return load('../model/xgb_best_model.pkl')
+    elif model_type == 'RandomForest':
+        return load('../model/rf_model.pkl')
+    else:
+        raise ValueError("지원하지 않는 모델 타입입니다.")
 
-st.title("⚾ KBO 승패 예측 AI")
+# Streamlit 앱
+st.title("⚾ 2025년 6월 3일 KBO 경기 예측")
 
-# 1. 팀 선택
-team_list = ["LG", "두산", "SSG", "NC", "KIA", "한화", "키움", "삼성", "롯데", "KT"]
-team1 = st.selectbox("🏆 팀 1을 선택하세요", team_list, index=0)
-team2 = st.selectbox("🆚 팀 2를 선택하세요", team_list, index=1)
+# 경기를 미리 정의
+match_list = {
+    "키움 vs 롯데": (3, 4),
+    "삼성 vs SSG": (2, 5),
+    "KIA vs 두산": (0, 1),
+    "KT vs 한화": (7, 6),
+    "LG vs NC": (8, 9)
+}
 
-# 2. 모델 선택
-model_name = st.selectbox("🧠 사용할 모델 선택", ["Logistic Regression", "Random Forest", "XGBoost", "딥러닝"])
+# 모델 선택
+model_type = st.selectbox("모델을 선택하세요", ['DeepLearning', 'LogisticRegression', 'XGBoost', 'RandomForest'])
+model = load_model_by_type(model_type)
 
-# 3. 예측 버튼
-if st.button("📊 예측하기"):
-    with st.spinner("모델 불러오는 중..."):
-        model_path = {
-            "Logistic Regression": "models/logistic_model.pkl",
-            "Random Forest": "models/rf_model.pkl",
-            "XGBoost": "models/xgb_model.pkl",
-            "딥러닝": "models/dl_model.h5"
-        }[model_name]
+# 경기 선택
+match = st.selectbox("경기를 선택하세요", list(match_list.keys()))
+home_Team, away_Team = match_list[match]
 
-        model = joblib.load(model_path) if model_name != "딥러닝" else None  # 딥러닝 모델은 따로 처리 필요
+# 예측 실행 버튼
+if st.button("예측 실행하기"):
 
-    # 4. 데이터 처리
-    df_input = load_and_prepare_data(team1, team2)  # rolling 처리 포함된 함수
+    # 1️⃣ 경기 데이터 생성
+    prediction_row = create_prediction_row(GameDate='2025-06-03', home_Team=home_Team, away_Team=away_Team)
 
-    # 5. 예측
-    prediction = predict_with_model(model, df_input, model_name)
-    st.success(f"✅ 예측 결과: **{prediction}** 팀이 이길 확률이 높습니다!")
+    # 2️⃣ 확률 예측
+    probability = predict_model(prediction_row, model_type)
+    win_team = 'home' if probability >= 0.5 else 'away'
+    win_team_name = home_Team if win_team == 'home' else away_Team
 
-    # 6. SHAP으로 feature 중요도 확인
-    important_features = get_important_features(model, df_input, model_name, top_n=5)
-    
-    st.markdown("### 🔍 주요 영향 요인 (상위 5개)")
-    st.write(important_features)
-    
-    # 7. GPT 해설 문장
-    st.markdown("### 📄 해설")
-    explanation = generate_explanation(team1, team2, important_features, model_name, prediction)
-    st.info(explanation)
+    st.subheader("예측 결과")
+    st.write(f"👉 {win_team_name} 승리 예상 (확률: {probability*100:.2f}%)")
 
-    print("asdf")
+    # 3️⃣ SHAP 해석
+    top_features = explain_instance(model, prediction_row, model_type)
+
+    st.subheader("중요 피처 (상위 5개)")
+    for feature in top_features:
+        st.write(f"- {feature}")
+
+    # 4️⃣ GPT 해설문 생성
+    team1_name = f"팀 {home_Team}"
+    team2_name = f"팀 {away_Team}"
+    pred_label = f"팀 {win_team_name}"
+
+    gpt_result = generate_explanation(
+        team1=team1_name,
+        team2=team2_name,
+        features=top_features,
+        model_name=model_type,
+        prediction=pred_label
+    )
+
+    st.subheader("GPT 해설")
+    st.write(gpt_result)

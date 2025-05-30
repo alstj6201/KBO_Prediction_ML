@@ -1,54 +1,61 @@
 import shap
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
-from tensorflow.keras.models import load_model, Sequential
-from joblib import load as joblib_load
+from tensorflow.keras.models import Sequential
 
-def run_model_explanation(model, X_train, X_sample):
+# 모델 타입별 background X_train 경로 미리 매핑
+X_TRAIN_PATHS = {
+    "LogisticRegression": "../models/X_train_logistic.csv",
+    "RandomForest": "../models/X_train_rf.csv",
+    "XGBoost": "../models/X_train_xgb.csv",
+    "DeepLearning": "../models/X_train_deep.csv"
+}
+
+def explain_instance(model, prediction_row, model_type):
     """
-    모델 유형(Logistic, Tree, Deep)을 감지해서 SHAP 해석 or coef 출력
+    SHAP 기반 중요 피처 5개 추출 (X_train은 내부에서 자동 로딩)
     """
-    # Logistic Regression
-    if isinstance(model, LogisticRegression):
-        print("🔎 Logistic Regression은 SHAP 대신 coef_ 사용")
+
+    # 모델에 맞는 background 데이터 로딩
+    X_train = pd.read_csv(X_TRAIN_PATHS[model_type])
+
+    # 1️⃣ Logistic Regression → coef 활용
+    if model_type == 'LogisticRegression':
         coefs = model.coef_[0]
-        coef_df = pd.DataFrame({
-            'Feature': X_train.columns,
-            'Coefficient': coefs
-        }).sort_values(by='Coefficient', key=abs, ascending=False)
+        values = prediction_row.values[0]
+        contribs = coefs * values
+        feature_contrib = pd.Series(contribs, index=prediction_row.columns)
+        top_features = feature_contrib.abs().sort_values(ascending=False).head(5).index.tolist()
+        return top_features
 
-        print(coef_df)
-        return coef_df
-
-    # Tree 모델
-    elif isinstance(model, (RandomForestClassifier, XGBClassifier)):
-        print("🌲 Tree 기반 모델 - TreeExplainer 사용 중...")
+    # 2️⃣ Tree 계열 → TreeExplainer
+    elif model_type in ['RandomForest', 'XGBoost']:
         explainer = shap.TreeExplainer(model)
-        shap_values = explainer.shap_values(X_sample)
-        shap.summary_plot(shap_values, X_sample, feature_names=X_sample.columns)
+        shap_values = explainer.shap_values(prediction_row)
+        
+        if isinstance(shap_values, list):
+            shap_values = shap_values[1]
 
-    # 딥러닝 모델
-    elif hasattr(model, "predict") and "keras" in str(type(model)).lower():
-        print("🧠 딥러닝 모델 - KernelExplainer 사용 중... (느릴 수 있음)")
-        explainer = shap.KernelExplainer(model.predict, shap.sample(X_train, 100))
-        shap_values = explainer.shap_values(X_sample)
-        shap.summary_plot(shap_values, X_sample, feature_names=X_sample.columns)
+        feature_contrib = pd.Series(shap_values[0], index=prediction_row.columns)
+        top_features = feature_contrib.abs().sort_values(ascending=False).head(5).index.tolist()
+        return top_features
+
+    # 3️⃣ 딥러닝 → KernelExplainer
+    elif model_type == 'DeepLearning':
+        background = shap.sample(X_train, 100, random_state=3)
+        explainer = shap.KernelExplainer(model.predict, background)
+        shap_values = explainer.shap_values(prediction_row, nsamples=100)
+        feature_contrib = pd.Series(shap_values[0], index=prediction_row.columns)
+        top_features = feature_contrib.abs().sort_values(ascending=False).head(5).index.tolist()
+        return top_features
 
     else:
-        raise ValueError("❌ 지원하지 않는 모델 타입입니다.")
+        raise ValueError("지원하지 않는 모델 타입입니다.")
+    
 
-def load_model_by_name(model_name: str):
-    """
-    모델 이름에 따라 joblib or keras 모델 자동 로딩
-    """
-    if model_name.endswith('.h5'):
-        return load_model(f"models/{model_name}")
-    elif model_name.endswith('.pkl'):
-        return joblib_load(f"models/{model_name}")
-    else:
-        raise ValueError("모델 확장자가 .h5 또는 .pkl 이어야 합니다.")
+#     top5_features = explain_instance(model, prediction_row, model_type='XGBoost')
+#     print(top5_features)
+
