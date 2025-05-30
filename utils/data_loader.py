@@ -1,8 +1,8 @@
 import pandas as pd
 
 def create_prediction_row(GameDate, home_Team, away_Team, 
-                          real_final_path='../data/real_final.csv',
-                          not_rolling_path='../data/final_data_not_rolling.csv'):
+                          real_final_path='data/real_final.csv',
+                          not_rolling_path='data/final_data_not_rolling.csv'):
 
     ### 1️⃣ real_final.csv에서 Recent_5_Win, Recent_5_Loss 갱신하기
     real_df = pd.read_csv(real_final_path)

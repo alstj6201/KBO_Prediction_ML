@@ -1,24 +1,26 @@
 import streamlit as st
 import pandas as pd
-from predictor import predict_model
-from data_loader import create_prediction_row
-from shap_explainer import explain_instance
-from gpt_summary import generate_explanation
+from utils.predictor import predict_model
+from utils.data_loader import create_prediction_row
+from utils.shap_explainer import explain_instance
+from utils.gpt_summary import generate_explanation
 from joblib import load
 from tensorflow.keras.models import load_model
 
-# 모델 로딩 함수
+
+# app.py
 def load_model_by_type(model_type):
     if model_type == 'DeepLearning':
-        return load_model('../model/deep_learning_model.h5')
+        return load_model('models/deep_learning_model.h5')
     elif model_type == 'LogisticRegression':
-        return load('../model/logistic_model.pkl')
+        return load('models/logistic_model.pkl')
     elif model_type == 'XGBoost':
-        return load('../model/xgb_best_model.pkl')
+        return load('models/xgb_best_model.pkl')
     elif model_type == 'RandomForest':
-        return load('../model/rf_model.pkl')
+        return load('models/rf_model.pkl')
     else:
         raise ValueError("지원하지 않는 모델 타입입니다.")
+
 
 # Streamlit 앱
 st.title("⚾ 2025년 6월 3일 KBO 경기 예측")

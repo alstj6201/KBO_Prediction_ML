@@ -1,25 +1,37 @@
 # KBO_Prediction_ML
 
-1. 모델 불러오기 및 예측
-models/ 폴더에 .pkl 또는 .h5 형식으로 저장
+✅ data_loader.py
+경기일, 홈팀, 원정팀을 입력받아 예측용 데이터 1행 생성
+최근 5경기 승패 및 롤링 평균, 최신 스탯을 계산해서 결합
+최종적으로 real_final.csv 형식의 한 행을 만든다
 
-predictor.py에서 joblib/keras 통해 모델 불러오고 예측 함수 정의
+✅ gpt_summary.py
+GPT API를 호출해서 자연어 해설문 생성
+예측 확률, 모델명, 주요 feature를 받아 프롬프트 작성
+야구 해설가처럼 한국어로 예측 이유를 설명해준다
 
-2. CSV 기반 rolling 처리
-data_loader.py에서 pandas로 데이터 불러오고, 사용자가 고른 팀에 대해 최근 N경기 rolling 처리
+✅ make_feature_pickle.py
+각 모델 학습용 X_train.csv에서 feature list 추출
+feature_columns를 pkl로 저장 (예측시 피처 정렬용)
+추후 모든 모델 예측/SHAP 해석에서 컬럼 순서 맞출 때 사용
 
-3. SHAP 분석
-shap_explainer.py: 각 모델별 SHAP value 추출 및 중요 feature 상위 N개 뽑기
+✅ predictor.py
+4개 모델 (DeepLearning, Logistic, XGB, RF)별로 예측 함수
+prediction_row 전처리 (정규화+인코딩+피처정렬) 후 확률 반환
+feature_columns pkl을 불러와서 항상 컬럼 안전하게 맞춘다
 
-4. 문장 생성
-gpt_summary.py: 중요 feature들을 prompt로 구성해서 OpenAI API 호출
+✅ shap_explainer.py
+각 모델별로 SHAP 기반 중요 feature 5개 추출
+Logistic은 coef, 나머진 SHAP(Tree/KernalExplainer) 사용
+feature_columns로 reindex해 컬럼 불일치 문제 예방
 
-API 키는 config.py에서 환경변수로 안전하게 관리 (os.environ["OPENAI_API_KEY"])
+✅ app.py
+Streamlit 웹앱 메인
+모델선택 → 경기선택 → 예측수행 → SHAP해석 → GPT해설 전과정 통합
+전체 KBO 예측 서비스 파이프라인을 종합적으로 연결
 
-5. 보안
-.env 파일에 API 키 저장, .gitignore에 .env 포함
+✅ features_model.pkl
+모델 특징 저장
 
-config.py에서 dotenv로 불러오기
-
-6. Streamlit 앱 구성
-app.py에서 모델 선택, 팀 선택, 예측 결과 및 해설 문장 출력
+✅ X_train_model.csv
+모델에 사용된 X_train 저장(SHAP에서 사용하기 위함)
