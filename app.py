@@ -6,9 +6,21 @@ from utils.shap_explainer import explain_instance
 from utils.gpt_summary import generate_explanation
 from joblib import load
 from tensorflow.keras.models import load_model
+import os
+from dotenv import load_dotenv
 
+# 환경설정
+st.set_page_config(page_title="KBO AI 승부 예측", page_icon="⚾", layout="centered")
+load_dotenv()
 
-# app.py
+# 팀 이름 ↔ 숫자 매핑
+team_name_to_id = {
+    "KIA": 0, "두산": 1, "삼성": 2, "키움": 3, "롯데": 4,
+    "SSG": 5, "한화": 6, "KT": 7, "LG": 8, "NC": 9
+}
+team_id_to_name = {v: k for k, v in team_name_to_id.items()}
+
+# 모델 로딩
 def load_model_by_type(model_type):
     if model_type == 'DeepLearning':
         return load_model('models/deep_learning_model.h5')
@@ -21,60 +33,101 @@ def load_model_by_type(model_type):
     else:
         raise ValueError("지원하지 않는 모델 타입입니다.")
 
+# CSS 스타일 넣기 (깔끔한 카드 스타일)
+st.markdown("""
+    <style>
+    .title { font-size: 40px; font-weight: bold; color: #2C3E50; text-align: center; margin-bottom: 20px; }
+    .result-box {
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        font-size: 22px;
+        text-align: center;
+        font-weight: bold;
+        color: #34495E;
+        margin-bottom: 20px;
+    }
+    .feature-box {
+        background-color: #ecf0f1;
+        padding: 10px 15px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        color: #2C3E50;
+        font-size: 16px;
+    }
+    .gpt-box {
+        background-color: #f1f8e9;
+        padding: 20px;
+        border-radius: 10px;
+        font-size: 16px;
+        color: #2C3E50;
+        line-height: 1.6;
+    }
+    .section-header {
+        font-size: 24px;
+        font-weight: bold;
+        color: #34495E;
+        margin-top: 30px;
+        margin-bottom: 10px;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-# Streamlit 앱
-st.title("⚾ 2025년 6월 3일 KBO 경기 예측")
+# 페이지 타이틀
+st.markdown("<div class='title'>⚾ 2025 KBO AI 승부 예측</div>", unsafe_allow_html=True)
 
-# 경기를 미리 정의
+# 경기 목록
 match_list = {
-    "키움 vs 롯데": (3, 4),
-    "삼성 vs SSG": (2, 5),
-    "KIA vs 두산": (0, 1),
-    "KT vs 한화": (7, 6),
-    "LG vs NC": (8, 9)
+    "키움 vs 롯데": ("키움", "롯데"),
+    "삼성 vs SSG": ("삼성", "SSG"),
+    "KIA vs 두산": ("KIA", "두산"),
+    "KT vs 한화": ("KT", "한화"),
+    "LG vs NC": ("LG", "NC")
 }
 
 # 모델 선택
-model_type = st.selectbox("모델을 선택하세요", ['DeepLearning', 'LogisticRegression', 'XGBoost', 'RandomForest'])
+st.markdown("<div class='section-header'>모델 선택</div>", unsafe_allow_html=True)
+model_type = st.selectbox("", ['DeepLearning', 'LogisticRegression', 'XGBoost', 'RandomForest'])
 model = load_model_by_type(model_type)
 
 # 경기 선택
-match = st.selectbox("경기를 선택하세요", list(match_list.keys()))
+st.markdown("<div class='section-header'>경기 선택</div>", unsafe_allow_html=True)
+match = st.selectbox("", list(match_list.keys()))
 home_Team, away_Team = match_list[match]
 
-# 예측 실행 버튼
-if st.button("예측 실행하기"):
+# 예측 실행
+if st.button("🔮 예측 실행하기"):
+    home_id = team_name_to_id[home_Team]
+    away_id = team_name_to_id[away_Team]
 
-    # 1️⃣ 경기 데이터 생성
-    prediction_row = create_prediction_row(GameDate='2025-06-03', home_Team=home_Team, away_Team=away_Team)
+    prediction_row = create_prediction_row(GameDate='2025-06-03', home_Team=home_id, away_Team=away_id)
 
-    # 2️⃣ 확률 예측
     probability = predict_model(prediction_row, model_type)
-    win_team = 'home' if probability >= 0.5 else 'away'
-    win_team_name = home_Team if win_team == 'home' else away_Team
 
-    st.subheader("예측 결과")
-    st.write(f"👉 {win_team_name} 승리 예상 (확률: {probability*100:.2f}%)")
+    if probability >= 0.5:
+        win_team = home_Team
+        win_prob = probability
+    else:
+        win_team = away_Team
+        win_prob = 1 - probability
 
-    # 3️⃣ SHAP 해석
-    top_features = explain_instance(model, prediction_row, model_type)
 
-    st.subheader("중요 피처 (상위 5개)")
-    for feature in top_features:
-        st.write(f"- {feature}")
+    # 결과 표시
+    st.markdown(f"<div class='result-box'>🏆 {win_team} 승리 예상 ({win_prob*100:.2f}%)</div>", unsafe_allow_html=True)
 
-    # 4️⃣ GPT 해설문 생성
-    team1_name = f"팀 {home_Team}"
-    team2_name = f"팀 {away_Team}"
-    pred_label = f"팀 {win_team_name}"
+    # SHAP 피처
+    # 기존: top_features = explain_instance(model, prediction_row, model_type)
 
-    gpt_result = generate_explanation(
-        team1=team1_name,
-        team2=team2_name,
-        features=top_features,
-        model_name=model_type,
-        prediction=pred_label
-    )
+    # 수정: 팀 feature 제외 필터링
+    raw_top_features = explain_instance(model, prediction_row, model_type)
+    top_features = [f for f in raw_top_features if not (f.startswith("home_Team_") or f.startswith("away_Team_"))]
 
-    st.subheader("GPT 해설")
-    st.write(gpt_result)
+    st.markdown("<div class='section-header'>📊 주요 피처 </div>", unsafe_allow_html=True)
+    for f in top_features:
+        st.markdown(f"<div class='feature-box'>- {f}</div>", unsafe_allow_html=True)
+
+    # GPT 해설
+    explanation = generate_explanation(home_Team, away_Team, top_features, model_type, win_team)
+    st.markdown("<div class='section-header'>🎙 AI 해설</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='gpt-box'>{explanation}</div>", unsafe_allow_html=True)
