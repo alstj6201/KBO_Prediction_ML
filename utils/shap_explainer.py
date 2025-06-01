@@ -44,7 +44,10 @@ def explain_instance(model, prediction_row, model_type):
         explainer = shap.TreeExplainer(model)
         shap_values = explainer.shap_values(prediction_row)
 
-        feature_contrib = pd.Series(shap_values[0], index=prediction_row.columns)
+        feature_array = shap_values[0]
+        if feature_array.ndim == 2:
+            feature_array = feature_array.mean(axis=1)
+        feature_contrib = pd.Series(feature_array, index=prediction_row.columns)
         top_features = feature_contrib.abs().sort_values(ascending=False).head(5).index.tolist()
         return top_features
 
