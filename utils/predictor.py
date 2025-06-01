@@ -81,7 +81,7 @@ def predict_model(prediction_row, model_type):
 
     ### RandomForest (이건 기존과 동일)
     elif model_type == 'RandomForest':
-        model = load('models/rf_model.pkl')
+        model = load('models/best_random_forest_model_manual.pkl')
 
         row_no_date = row.drop(columns=['GameDate'])
         X = row_no_date.drop(columns=['Result'], errors='ignore')
