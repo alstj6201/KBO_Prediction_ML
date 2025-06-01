@@ -29,7 +29,7 @@ def load_model_by_type(model_type):
     elif model_type == 'XGBoost':
         return load('models/xgb_best_model.pkl')
     elif model_type == 'RandomForest':
-        return load('models/rf_model.pkl')
+        return load('models/best_random_forest_model_manual.pkl')
     else:
         raise ValueError("지원하지 않는 모델 타입입니다.")
 
@@ -88,7 +88,7 @@ match_list = {
 
 # 모델 선택
 st.markdown("<div class='section-header'>모델 선택</div>", unsafe_allow_html=True)
-model_type = st.selectbox("", ['DeepLearning', 'LogisticRegression', 'XGBoost', 'RandomForest'])
+model_type = st.selectbox("", ['Deep Learning', 'LogisticRegression', 'XGBoost', 'RandomForest'])
 model = load_model_by_type(model_type)
 
 # 경기 선택
