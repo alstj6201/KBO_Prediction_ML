@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 load_dotenv()
 client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# 1️⃣ feature 설명 사전 (기존 그대로 유지)
 feature_description = {
     "home_Recent_5_Win": "홈팀의 최근 5경기 승리 수",
     "home_Recent_5_Loss": "홈팀의 최근 5경기 패배 수",
@@ -31,18 +30,17 @@ feature_description = {
     "away_TBF": "원정팀 투수가 상대 타자를 상대한 횟수(TBF)"
 }
 
-# 2️⃣ 내부 팀 정보 DB (민서가 준 표 반영해서 만든 dict)
 team_info = {
-    "LG": {"rank": 1, "recent": "4승 1무 5패"},
+    "LG": {"rank": 1, "recent": "4승 0무 6패"},
     "한화": {"rank": 2, "recent": "5승 0무 5패"},
     "롯데": {"rank": 3, "recent": "3승 1무 6패"},
-    "KT": {"rank": 4, "recent": "8승 0무 2패"},
-    "삼성": {"rank": 5, "recent": "9승 0무 1패"},
+    "삼성": {"rank": 4, "recent": "9승 0무 1패"},
+    "KT": {"rank": 5, "recent": "7승 0무 3패"},
     "SSG": {"rank": 6, "recent": "5승 1무 4패"},
-    "KIA": {"rank": 7, "recent": "4승 1무 5패"},
+    "KIA": {"rank": 7, "recent": "5승 1무 4패"},
     "NC": {"rank": 8, "recent": "3승 2무 5패"},
     "두산": {"rank": 9, "recent": "4승 1무 5패"},
-    "키움": {"rank": 10, "recent": "1승 1무 8패"},
+    "키움": {"rank": 10, "recent": "2승 1무 7패"},
 }
 
 # 3️⃣ generate_explanation 함수
