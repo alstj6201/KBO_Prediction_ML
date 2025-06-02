@@ -4,6 +4,7 @@ from joblib import load
 from tensorflow.keras.models import load_model
 from sklearn.preprocessing import StandardScaler
 import joblib
+import os
 
 def predict_model(prediction_row, model_type):
     row = prediction_row.copy().reset_index(drop=True)
@@ -19,7 +20,13 @@ def predict_model(prediction_row, model_type):
 
     ### Deep Learning
     if model_type == 'DeepLearning':
-        model = load_model('models/deep_learning_model.keras')
+        
+
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        model_path = os.path.join(BASE_DIR, 'models', 'deep_learning_model.keras')
+        model = load_model(model_path)
+
+        # model = load_model('models/deep_learning_model.keras')
 
         exclude_columns = ['GameDate', 'home_Team', 'away_Team']
         X_to_scale = row.drop(columns=exclude_columns)

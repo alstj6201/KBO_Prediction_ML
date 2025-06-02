@@ -23,7 +23,9 @@ team_id_to_name = {v: k for k, v in team_name_to_id.items()}
 # 모델 로딩
 def load_model_by_type(model_type):
     if model_type == 'DeepLearning':
-        return load_model('models/deep_learning_model.keras')
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        model_path = os.path.join(BASE_DIR, 'models', 'deep_learning_model.keras')
+        return load_model(model_path)
     elif model_type == 'LogisticRegression':
         return load('models/logistic_model.pkl')
     elif model_type == 'XGBoost':
