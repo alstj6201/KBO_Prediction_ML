@@ -5,6 +5,7 @@ from utils.data_loader import create_prediction_row
 from utils.shap_explainer import explain_instance
 from utils.gpt_summary import generate_explanation
 from joblib import load
+from tensorflow import keras
 from tensorflow.keras.models import load_model
 import os
 from dotenv import load_dotenv
@@ -23,7 +24,7 @@ team_id_to_name = {v: k for k, v in team_name_to_id.items()}
 # 모델 로딩
 def load_model_by_type(model_type):
     if model_type == 'DeepLearning':
-        return load('deep_learning_model.keras')
+        return keras.models.load_model('models/deep_learning_model.keras')
     elif model_type == 'LogisticRegression':
         return load('models/logistic_model.joblib')
     elif model_type == 'XGBoost':

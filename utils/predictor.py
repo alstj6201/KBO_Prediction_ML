@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from joblib import load
 from tensorflow.keras.models import load_model
+from tensorflow import keras
 from sklearn.preprocessing import StandardScaler
 import joblib
 import os
@@ -26,7 +27,8 @@ def predict_model(prediction_row, model_type):
         # model_path = os.path.join(BASE_DIR, 'models', 'deep_learning_model.keras')
         # model = load_model(model_path)
 
-        model = load_model('models/deep_learning_model.keras')
+        # model = load_model('models/deep_learning_model.keras')
+        model = keras.models.load_model('models/deep_learning_model.keras')
 
         exclude_columns = ['GameDate', 'home_Team', 'away_Team']
         X_to_scale = row.drop(columns=exclude_columns)
