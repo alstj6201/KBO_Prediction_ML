@@ -114,7 +114,7 @@ st.markdown("""
 
 
 # 페이지 타이틀
-st.markdown("<div class='title'>⚾ 2025 KBO AI 승부 예측</div>", unsafe_allow_html=True)
+st.markdown("<div class='title'>⚾ KBO AI 승부 예측</div>", unsafe_allow_html=True)
 
 # 경기 목록
 match_list = {
