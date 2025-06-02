@@ -6,5 +6,5 @@ pandas
 numpy
 openai
 python-dotenv
-tensorflow
 joblib
+tensorflow-cpu==2.11.0
