@@ -27,11 +27,11 @@ def load_model_by_type(model_type):
         model_path = os.path.join(BASE_DIR, 'models', 'deep_learning_model.keras')
         return load_model(model_path)
     elif model_type == 'LogisticRegression':
-        return load('models/logistic_model.pkl')
+        return load('models/logistic_model.joblib')
     elif model_type == 'XGBoost':
         return load('models/xgb_best_model.pkl')
     elif model_type == 'RandomForest':
-        return load('models/best_random_forest_model_manual.pkl')
+        return load('models/random_forest_model.joblib')
     else:
         raise ValueError("지원하지 않는 모델 타입입니다.")
 

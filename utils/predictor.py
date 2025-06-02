@@ -47,7 +47,7 @@ def predict_model(prediction_row, model_type):
 
     ### Logistic Regression
     elif model_type == 'LogisticRegression':
-        model = load('models/logistic_model.pkl')
+        model = load('models/logistic_model.joblib')
 
         exclude_columns = ['GameDate', 'home_Team', 'away_Team']
         X_to_scale = row.drop(columns=exclude_columns)
@@ -88,7 +88,7 @@ def predict_model(prediction_row, model_type):
 
     ### RandomForest (이건 기존과 동일)
     elif model_type == 'RandomForest':
-        model = load('models/best_random_forest_model_manual.pkl')
+        model = load('models/random_forest_model.joblib')
 
         row_no_date = row.drop(columns=['GameDate'])
         X = row_no_date.drop(columns=['Result'], errors='ignore')
