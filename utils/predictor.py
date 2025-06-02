@@ -19,7 +19,7 @@ def predict_model(prediction_row, model_type):
 
     ### Deep Learning
     if model_type == 'DeepLearning':
-        model = load_model('models/deep_learning_model.h5')
+        model = load_model('models/deep_learning_model.keras')
 
         exclude_columns = ['GameDate', 'home_Team', 'away_Team']
         X_to_scale = row.drop(columns=exclude_columns)

@@ -23,7 +23,7 @@ team_id_to_name = {v: k for k, v in team_name_to_id.items()}
 # 모델 로딩
 def load_model_by_type(model_type):
     if model_type == 'DeepLearning':
-        return load_model('models/deep_learning_model.h5')
+        return load_model('models/deep_learning_model.keras')
     elif model_type == 'LogisticRegression':
         return load('models/logistic_model.pkl')
     elif model_type == 'XGBoost':

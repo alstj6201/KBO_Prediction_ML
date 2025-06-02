@@ -1,11 +1,11 @@
 streamlit
-scikit-learn
+scikit-learn==1.6.0
 xgboost
 shap
 pandas
 numpy==1.23.5
 openai
 python-dotenv
-joblib
+joblib==1.2.0
 tensorflow-cpu==2.10.0
 ml_dtypes==0.2.0
