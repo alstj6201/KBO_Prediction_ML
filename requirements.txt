@@ -3,7 +3,7 @@ scikit-learn
 xgboost
 shap
 pandas
-numpy
+numpy==1.23.5
 openai
 python-dotenv
 joblib
