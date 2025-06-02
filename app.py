@@ -164,11 +164,15 @@ if st.button("🔮 예측 실행하기"):
     raw_top_features = explain_instance(model, prediction_row, model_type)
     top_features = [f for f in raw_top_features if not (f.startswith("home_Team_") or f.startswith("away_Team_"))]
 
+    # GPT 해설
+    with st.spinner("🎙 AI 해설 준비 중..."):
+        explanation = generate_explanation(home_Team, away_Team, top_features, model_type, win_team)
+
+    st.markdown("<div class='section-header'>🎙 AI 해설</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='gpt-box'>{explanation}</div>", unsafe_allow_html=True)
+
     st.markdown("<div class='section-header'>📊 주요 피처 </div>", unsafe_allow_html=True)
     for f in top_features:
         st.markdown(f"<div class='feature-box'>{f}</div>", unsafe_allow_html=True)
 
-    # GPT 해설
-    explanation = generate_explanation(home_Team, away_Team, top_features, model_type, win_team)
-    st.markdown("<div class='section-header'>🎙 AI 해설</div>", unsafe_allow_html=True)
-    st.markdown(f"<div class='gpt-box'>{explanation}</div>", unsafe_allow_html=True)
+
