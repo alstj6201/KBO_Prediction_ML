@@ -36,43 +36,81 @@ def load_model_by_type(model_type):
 # CSS 스타일 넣기 (깔끔한 카드 스타일)
 st.markdown("""
     <style>
-    .title { font-size: 40px; font-weight: bold; color: #2C3E50; text-align: center; margin-bottom: 20px; }
+    /* 전체 폰트 조금 더 깔끔하게 */
+    html, body, [class*="css"]  {
+        font-family: 'Arial', sans-serif;
+    }
+
+    .title {
+        font-size: 40px; 
+        font-weight: bold; 
+        text-align: center; 
+        margin-bottom: 20px;
+        color: var(--text-color);
+    }
+
+    .section-header {
+        font-size: 24px;
+        font-weight: bold;
+        margin-top: 30px;
+        margin-bottom: 10px;
+        color: var(--text-color);
+    }
+
     .result-box {
-        background-color: #f9f9f9;
+        background-color: var(--box-bg);
         padding: 20px;
         border-radius: 10px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         font-size: 22px;
         text-align: center;
         font-weight: bold;
-        color: #34495E;
+        color: var(--text-color);
         margin-bottom: 20px;
     }
+
+
     .feature-box {
-        background-color: #ecf0f1;
+        background-color: var(--feature-bg);
         padding: 10px 15px;
         border-radius: 8px;
         margin-bottom: 8px;
-        color: #2C3E50;
+        color: var(--text-color);
         font-size: 16px;
-    }
+    }       
+
+
+
     .gpt-box {
-        background-color: #f1f8e9;
+        background-color: var(--gpt-bg);
         padding: 20px;
         border-radius: 10px;
         font-size: 16px;
-        color: #2C3E50;
+        color: var(--text-color);
         line-height: 1.6;
     }
-    .section-header {
-        font-size: 24px;
-        font-weight: bold;
-        color: #34495E;
-        margin-top: 30px;
-        margin-bottom: 10px;
+
+    /* 라이트모드 기본 색상 */
+    :root {
+        --text-color: #2C3E50;
+        --box-bg: #f9f9f9;
+        --feature-bg: #ecf0f1;
+        --gpt-bg: #f1f8e9;
     }
+
+    /* 다크모드 적용 */
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --text-color: #ecf0f1;
+            --box-bg: #2C3E50;
+            --feature-bg: #3C4A5A;
+            --gpt-bg: #3E4F2F;
+        }
+    }
+
     </style>
 """, unsafe_allow_html=True)
+
 
 # 페이지 타이틀
 st.markdown("<div class='title'>⚾ 2025 KBO AI 승부 예측</div>", unsafe_allow_html=True)
@@ -95,6 +133,8 @@ model = load_model_by_type(model_type)
 st.markdown("<div class='section-header'>경기 선택</div>", unsafe_allow_html=True)
 match = st.selectbox("", list(match_list.keys()))
 home_Team, away_Team = match_list[match]
+
+st.write("") 
 
 # 예측 실행
 if st.button("🔮 예측 실행하기"):
@@ -125,7 +165,7 @@ if st.button("🔮 예측 실행하기"):
 
     st.markdown("<div class='section-header'>📊 주요 피처 </div>", unsafe_allow_html=True)
     for f in top_features:
-        st.markdown(f"<div class='feature-box'>- {f}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='feature-box'>{f}</div>", unsafe_allow_html=True)
 
     # GPT 해설
     explanation = generate_explanation(home_Team, away_Team, top_features, model_type, win_team)
