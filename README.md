@@ -1,7 +1,6 @@
 # KBO_Prediction_ML
 
-## 프로젝트 소개
-한양대학교 데이터사이언스학부 머신러닝1 프로젝트
+## 한양대학교 데이터사이언스학부 머신러닝1 프로젝트
 
 KBO(한국 프로야구) 경기 결과를 머신러닝 기반으로 예측하는 프로젝트입니다.  
 크롤링부터 데이터 전처리, 모델링, 해석, 자연어 해설 생성까지 전 과정을 통합한 서비스 파이프라인을 구현했습니다.
@@ -62,14 +61,14 @@ KBO(한국 프로야구) 경기 결과를 머신러닝 기반으로 예측하는
 - Logistic Regression
 - Random Forest
 - XGBoost
-- Deep Learning (Fully Connected Neural Network)
+- Deep Learning 
 
 ---
 
 ## 기술 스택
 
 - Python (pandas, numpy, scikit-learn, xgboost, tensorflow, keras 등)
-- Selenium (웹 크롤링)
+- BeautifulSoap (웹 크롤링)
 - SHAP (모델 해석)
 - OpenAI GPT API (자연어 해설)
 - Streamlit (웹 서비스)
